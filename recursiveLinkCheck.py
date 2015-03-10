@@ -1,20 +1,29 @@
 from bs4 import BeautifulSoup
 import urllib.request
+import smtplib
+from email.mime.text import MIMEText
 
 BASEURL = "http://www.uvm.edu/~cems/"
 CHECK = "sandbox"
 REPEAT = "~cems"
-EXCEPT = ['magic','.pdf','calendar']
+EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany']
 CHECKEDLINKS = ["http://www.uvm.edu/~cems/"]
 COUNT = 0
+FILENAME = 'BadLinks.txt'
 
 
 def main():
     badLinks = []
     badLinks.extend(getBadLinks(BASEURL))
-
+    file = open(FILENAME,'w')
+    
     for i in badLinks:
+        file.write(i+'\n')
         print(i)
+    file.close()
+
+    #email()
+    
 
 def getBadLinks(url):
     try:
@@ -35,9 +44,10 @@ def getBadLinks(url):
         
         for link in linkSoup:
             if (CHECK in link['href']):
-                bLinks.append('Bad Link in '+url+' linking to: '+link['href'])
+                rurl = url.split('edu/',1)[1]
+                bLinks.append('Bad Link in '+rurl+' linking to: '+link['href'])
                 print('foundbadlink: '+url)
-            elif (REPEAT in link['href'] and b_any(x in link['href'] for x in EXCEPT)):
+            elif (REPEAT in link['href'] and not any(x in link['href'] for x in EXCEPT)):
                 if ('www' in link['href'] and link['href'] not in CHECKEDLINKS):
                     CHECKEDLINKS.append(link['href'])
                     bLinks.extend(getBadLinks(link['href']))
