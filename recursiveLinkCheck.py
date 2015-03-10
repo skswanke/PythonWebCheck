@@ -7,7 +7,7 @@ BASEURL = "http://www.uvm.edu/~cems/"
 CHECK = "sandbox"
 REPEAT = "~cems"
 EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany']
-CHECKEDLINKS = ["http://www.uvm.edu/~cems/"]
+CHECKEDLINKS = [BASEURL]
 COUNT = 0
 FILENAME = 'BadLinks.txt'
 
