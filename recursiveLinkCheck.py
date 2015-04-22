@@ -1,7 +1,5 @@
 from bs4 import BeautifulSoup
 import urllib.request
-import smtplib
-from email.mime.text import MIMEText
 
 BASEURL = "http://www.uvm.edu/~cems/"
 CHECK = "sandbox"
@@ -21,9 +19,6 @@ def main():
         file.write(i+'\n')
         print(i)
     file.close()
-
-    #email()
-    
 
 def getBadLinks(url):
     try:
@@ -59,8 +54,8 @@ def getBadLinks(url):
                                     
         return bLinks
     
-    except:
-        print('bad link')
+    except Exception as e:
+        print("Error: " + str(e))
         return bLinks
 
 main()

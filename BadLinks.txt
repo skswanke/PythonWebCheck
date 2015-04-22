@@ -1,56 +1,33 @@
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/NationalLifeGroup.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/VELCO.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/northPower.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/RenewableNRG.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform Omya.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/2015IntakeformStateStreet.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform UVM_IXIS.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/HaywardTyler2015Intakeform.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/cadEng.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/projMan.pdf
-Bad Link in ~cems/mathstat/?Page=../internship/summer.php&SM=_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform_VT_Gas.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/NationalLifeGroup.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/VELCO.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/northPower.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/RenewableNRG.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform Omya.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015IntakeformStateStreet.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform UVM_IXIS.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/HaywardTyler2015Intakeform.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/cadEng.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/projMan.pdf
-Bad Link in ~cems/soe/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform_VT_Gas.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/NationalLifeGroup.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/VELCO.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/northPower.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/RenewableNRG.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform Omya.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015IntakeformStateStreet.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform UVM_IXIS.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/HaywardTyler2015Intakeform.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/cadEng.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/projMan.pdf
-Bad Link in ~cems/cs/?Page=../internship/summer.php&SM=../internship/_globalInternship.html linking to: /~sandbox/internship/forms/2015Intakeform_VT_Gas.pdf
-Bad Link in ~cems/soe/?Page=grad/ece/default.php&SM=grad/_gradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=research/sys-bio/default.php
-Bad Link in ~cems/soe/?Page=grad/ece/default.php&SM=grad/_gradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=research/sys-sustain/default.php
-Bad Link in ~cems/soe/?Page=grad/ece/default.php&SM=grad/_gradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=research/sys-multi/default.php
-Bad Link in ~cems/soe/?Page=grad/ece/default.php&SM=grad/_gradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=research/sys-sensors/default.php
+Bad Link in ~cems/?Page=current/honors.html&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=prospect/compreqs_main.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/studentorgs.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/courseeval.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
 Bad Link in ~cems/soe/?Page=undergrad/ece/default.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=seed/default.php
 Bad Link in ~cems/soe/?Page=undergrad/ece/default.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=contact.php
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/NationalLifeGroup.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/VELCO.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/northPower.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/RenewableNRG.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform Omya.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/2015IntakeformStateStreet.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform UVM_IXIS.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/HaywardTyler2015Intakeform.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/cadEng.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/projMan.pdf
-Bad Link in ~cems/?Page=internship/summer.php&SM=internship/_internshipmenu.html linking to: /~sandbox/internship/forms/2015Intakeform_VT_Gas.pdf
-Bad Link in ~cems/?Page=current/careerservices.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=current/careerupdateFall09.php&SM=current/_currentmenu.html
-Bad Link in ~cems/?Page=current/careerservices.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=current/careerlinks.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=compservices/howto.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=compservices/default.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/compreqs_main.php&SM=current/_currentmenu.html#buy linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/compreqs_main.php&SM=current/_currentmenu.html#specs linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/tutoring.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/careerservices.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/hss_req.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/careerlinks.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet14-15.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet13-14.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet12-13.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet11-12.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet10-11.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet09-10.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet08-09.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet07-08.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet06-07.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/checksheet05-06.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/careerupdateFall09.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/studentservices.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
+Bad Link in ~cems/?Page=current/default.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
 Bad Link in ~cems/soe/?Page=undergrad/ece/curriculum.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=seed/default.php
 Bad Link in ~cems/soe/?Page=undergrad/ece/curriculum.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=contact.php
+Bad Link in ~cems/?Page=current/hss_req.php&SM=current/_currentmenu.html linking to: http://www.uvm.edu/~sandbox/?Page=compservices/default.php&SM=current/_currentmenu.html
 Bad Link in ~cems/soe?Page=undergrad/ece/default.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=seed/default.php
 Bad Link in ~cems/soe?Page=undergrad/ece/default.php&SM=undergrad/_undergradmenu.html linking to: http://www.uvm.edu/~sandbox/soe/?Page=contact.php
