@@ -186,7 +186,6 @@ This method check the http response of a given link
 def getResponseCode(url):
     try:
         conn = urllib.request.urlopen(url)
-        #print(str(conn.getcode()))
         return conn.getcode()
     except urllib.error.HTTPError:
         return 404
@@ -200,9 +199,6 @@ This function checks the spelling for every word on the given page
     -List of misspelled words
 '''
 def spellCheck(words, url):
-    #print("spell check start")
-    #print(words)
-    #words = words.decode('utf-8')
     badWords = []
     english = enchant.Dict('en_US')
     first = True
@@ -251,8 +247,6 @@ def sendToBaseCamp():
     file2.write(str(resp))
     file2.write(resp.text)
     file2.close()
-    #print(resp.text)
-    #print(content)
 
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
