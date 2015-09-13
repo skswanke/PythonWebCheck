@@ -1,8 +1,8 @@
-from bs4 import BeautifulSoup
+﻿from bs4 import BeautifulSoup
 import urllib.request
 import requests
 import datetime
-import enchant
+#import enchant
 import re
 
 # This is the start point for the recursion
@@ -35,6 +35,9 @@ SPELLCHECK = False
 # This is for the Basecamp API
 # Set to false if you are testing
 BASECAMP = False
+# Your Basecamp Username and Password
+USERNAME = ""
+PASSWORD = ""
 
 # This will check ALL links for 404 It will take Significantly more time
 CHECK404 = False
@@ -42,9 +45,9 @@ CHECK404 = False
 # Enables Debug features
 DEBUG = True
 
-# Your Basecamp Username and Password
-USERNAME = ""
-PASSWORD = ""
+#Post result to a slack webhook
+SLACK = True
+SLACKHOOK = "https://hooks.slack.com/services/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"
 
 if (DEBUG):
     print(str(DATE.hour) + ':' + str(DATE.minute) + ':' + str(DATE.second))
@@ -56,7 +59,7 @@ def main():
     print('Started')
     badLinks = []
     badLinks.extend(getBadLinks(BASEURL,BASEURL))
-    file = open(FILENAME,'w+')
+    file = open(FILENAME,'w')
     print('badLinks Length:'+str(len(badLinks)))
     if (len(badLinks) == 0):
         print("All Clear!")
@@ -97,6 +100,8 @@ def main():
     file.close()
     if (BASECAMP):
         sendToBaseCamp()
+    if (SLACK):
+        sendToSlack()
     
 '''
 @params:
@@ -130,9 +135,7 @@ def getBadLinks(url, lastUrl):
         global COUNT
         global CHECKEDLINKS
 
-        #print(url)
         COUNT += 1
-        #print(COUNT)
         
         soup = BeautifulSoup(pageHTML)
 
@@ -145,10 +148,14 @@ def getBadLinks(url, lastUrl):
         for link in linkSoup:
             if link.has_attr('href'):
                 if (CHECK in link['href']):
-                    bLinks.append('Bad Link in '+url+'\nlinking to: '+link['href'])
-                    #print('foundbadlink: '+url)
+                    if (SLACK):
+                        bLinks.append('Bad Link in <'+url+'|link>\nlinking to: <'+link['href'] + '|link>')
+                    else:
+                        bLinks.append('Bad Link in '+url+'\nlinking to: '+link['href'])
+                    if (DEBUG):
+                        print('foundbadlink: '+url)
                 elif (REPEAT in link['href'] and not any(x in link['href'] for x in EXCEPT)):
-                    if ('http' and 'www' in link['href'] and link['href'] not in CHECKEDLINKS):
+                    if ('http' in link['href'] and 'www' in link['href'] and link['href'] not in CHECKEDLINKS):
                         CHECKEDLINKS.append(link['href'])
                         bLinks.extend(getBadLinks(link['href'],url))
                     elif (link['href'] not in CHECKEDLINKS):
@@ -159,22 +166,29 @@ def getBadLinks(url, lastUrl):
                             bLinks.extend(getBadLinks(URLSTART+link['href'],url))
                 elif (CHECK404 and link['href'] not in CHECKEDLINKS and 404 == getResponseCode(link['href'])):
                     CHECKEDLINKS.append(link['href'])
-                    #print(link['href'])
-                    bLinks.append(["404 in page: " + url + "\nLinking to: " + link['href']])
+                    if (SLACK):
+                        bLinks.append(["404 in page: <" + url + "|link>\nLinking to: <" + link['href'] + "|link>"])
+                    else:
+                        bLinks.append(["404 in page: " + url + "\nLinking to: " + link['href']])
 
         COUNT -= 1
-                                    
+
         return bLinks
     
     except Exception as e:
         if ("404" in str(e)):
-            #print("404 in page: " + lastUrl + "\nLinking to: " + url)
+            if (DEBUG):
+                print("404 in page: " + lastUrl + "\nLinking to: " + url)
+            if (SLACK):
+                return ["404 in page: <" + lastUrl + "|link>\nLinking to: <" + url + "|link>"]
             return ["404 in page: " + lastUrl + "\nLinking to: " + url]
         elif ("href" in str(e)):
-            #print("Error: href")
+            if (DEBUG):
+                print("Error: href")
             pass
         else:
-            print('Error: ' + str(e))
+            if (DEBUG):
+                print('Error: ' + str(e))
             pass
         return bLinks
 
@@ -248,6 +262,18 @@ def sendToBaseCamp():
     file2.write(resp.text)
     file2.close()
 
+def sendToSlack():
+    now = datetime.datetime.now()
+    text = "Bot findings for " + str(now.month) + '/' + str(now.day) + '/' + str(now.year) + '\n'
+    file = open(FILENAME, 'r')
+    for line in file:
+        text = text + line.rstrip() + '\n'
+    file.close()
+
+    post = '{"text": "' + text + '"}'
+
+    resp = requests.post(SLACKHOOK, data=post)
+
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
@@ -263,7 +289,7 @@ if (DEBUG):
     print(str(finished.hour) + ':' + str(finished.minute) + ':' + str(finished.second))
 
 if(DEBUG):
-    file = open('Checkedlinks.txt', 'w+')
+    file = open('Logs/Checkedlinks.txt', 'w+')
     c = 0
     d = []
     for i in CHECKEDLINKS:
