@@ -2,8 +2,8 @@
 import urllib.request
 import requests
 import datetime
-#import enchant
 import re
+from urllib.parse import urljoin
 
 # This is the start point for the recursion
 BASEURL = "http://www.uvm.edu/~cems/"
@@ -31,16 +31,22 @@ FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' + str(DATE.day) + '_' + str(
 # This will enable spell checking for all pages
 # Currently Not working.
 SPELLCHECK = False
+if (SPELLCHECK):
+    from spellcheck import spellCheck
 
 # This is for the Basecamp API
 # Set to false if you are testing
 BASECAMP = False
+if (BASECAMP):
+    from handleAPI import sendToBaseCamp
 # Your Basecamp Username and Password
 USERNAME = ""
 PASSWORD = ""
 
 # This will check ALL links for 404 It will take Significantly more time
 CHECK404 = False
+if (CHECK404):
+    from handleAPI import getResponseCode
 
 # Enables Debug features
 DEBUG = True
@@ -48,6 +54,8 @@ DEBUG = True
 #Post result to a slack webhook
 SLACK = True
 SLACKHOOK = "https://hooks.slack.com/services/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"
+if (SLACK):
+    from handleAPI import sendToSlack
 
 if (DEBUG):
     print(str(DATE.hour) + ':' + str(DATE.minute) + ':' + str(DATE.second))
@@ -60,9 +68,11 @@ def main():
     badLinks = []
     badLinks.extend(getBadLinks(BASEURL,BASEURL))
     file = open(FILENAME,'w')
-    print('badLinks Length:'+str(len(badLinks)))
+    if (DEBUG):
+        print('badLinks Length:'+str(len(badLinks)))
     if (len(badLinks) == 0):
-        print("All Clear!")
+        if (DEBUG):
+            print("All Clear!")
         file.write("All Clear!")
     else:
         f404 = []
@@ -99,9 +109,9 @@ def main():
             file.write("All Clear!")
     file.close()
     if (BASECAMP):
-        sendToBaseCamp()
+        sendToBaseCamp(USERNAME, PASSWORD, FILENAME)
     if (SLACK):
-        sendToSlack()
+        sendToSlack(SLACKHOOK, FILENAME)
     
 '''
 @params:
@@ -147,15 +157,16 @@ def getBadLinks(url, lastUrl):
         
         for link in linkSoup:
             if link.has_attr('href'):
+                link['href'] = urlReconstruct(link['href'])
                 if (CHECK in link['href']):
                     if (SLACK):
-                        bLinks.append('Bad Link in <'+url+'|link>\nlinking to: <'+link['href'] + '|link>')
+                        bLinks.append('Bad Link in <'+url+'|link> linking to: <'+link['href'] + '|link>')
                     else:
                         bLinks.append('Bad Link in '+url+'\nlinking to: '+link['href'])
                     if (DEBUG):
                         print('foundbadlink: '+url)
                 elif (REPEAT in link['href'] and not any(x in link['href'] for x in EXCEPT)):
-                    if ('http' in link['href'] and 'www' in link['href'] and link['href'] not in CHECKEDLINKS):
+                    if (link['href'] not in CHECKEDLINKS):
                         CHECKEDLINKS.append(link['href'])
                         bLinks.extend(getBadLinks(link['href'],url))
                     elif (link['href'] not in CHECKEDLINKS):
@@ -167,7 +178,7 @@ def getBadLinks(url, lastUrl):
                 elif (CHECK404 and link['href'] not in CHECKEDLINKS and 404 == getResponseCode(link['href'])):
                     CHECKEDLINKS.append(link['href'])
                     if (SLACK):
-                        bLinks.append(["404 in page: <" + url + "|link>\nLinking to: <" + link['href'] + "|link>"])
+                        bLinks.append(["404 in page: <" + url + "|link> Linking to: <" + link['href'] + "|link>"])
                     else:
                         bLinks.append(["404 in page: " + url + "\nLinking to: " + link['href']])
 
@@ -180,7 +191,7 @@ def getBadLinks(url, lastUrl):
             if (DEBUG):
                 print("404 in page: " + lastUrl + "\nLinking to: " + url)
             if (SLACK):
-                return ["404 in page: <" + lastUrl + "|link>\nLinking to: <" + url + "|link>"]
+                return ["404 in page: <" + lastUrl + "|link> Linking to: <" + url + "|link>"]
             return ["404 in page: " + lastUrl + "\nLinking to: " + url]
         elif ("href" in str(e)):
             if (DEBUG):
@@ -192,94 +203,16 @@ def getBadLinks(url, lastUrl):
             pass
         return bLinks
 
-'''
-This method check the http response of a given link
-@params
-    -url to check status of
-'''
-def getResponseCode(url):
-    try:
-        conn = urllib.request.urlopen(url)
-        return conn.getcode()
-    except urllib.error.HTTPError:
-        return 404
+def urlReconstruct(url):
+    if ('http' in url):
+        return str(url)
+    elif ('//www' in url):
+        return 'http:' + url
+    elif ('uvm.edu' in url):
+        return str('http://www.' + url)
+    else:
+        return str(urljoin(str(BASEURL), str(url)))
 
-'''
-This function checks the spelling for every word on the given page
-@params
-    -Page HTML
-    -current URL
-@returns
-    -List of misspelled words
-'''
-def spellCheck(words, url):
-    badWords = []
-    english = enchant.Dict('en_US')
-    first = True
-    checkWords = re.findall(r"[\w]+", words)
-    for word in checkWords:
-        #print(word)
-        if (len(str(word)) > 2 and not any(char.isdigit() for char in word)):
-            try:
-                word = str(word)
-                print(word)
-                if(first and not english.check(word)):
-                    badWords.append('\nSpelling Error on: '+url)
-                    badWords.append(word)
-                elif(not english.check(word)):
-                    badWords.append(word)
-            except Exception as e:
-                print(str(e))
-    return badWords
-
-'''
-This function sends the relevant information to Basecamp using their api
-'''
-def sendToBaseCamp():
-    now = datetime.datetime.now()
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent' : 'PythonBotPoster (skswanke@gmail.com)'
-        }
-    subject = 'Bot Findings for ' + str(now.month) + '/' + str(now.day) + '/' + str(now.year)
-    subscribers = [859621, 9321794]
-    content = ""
-    file = open(FILENAME, 'r')
-    for line in file:
-        content = content + line.rstrip() + '\\n'
-
-    file.close()
-
-    postn = '{"subject": "' + subject + '", "content": "Made by your friendly neighborhood spider-bot!\\n\\n' + content +'", "subscribers": ' + str(subscribers) + '}'
-
-    post = bytes(str(postn), encoding="UTF-8")
-
-    resp = requests.post("https://www.basecamp.com/1800866/api/v1/projects/7236326/messages.json", data=post, auth=(USERNAME, PASSWORD), headers=headers)
-    
-    file2 = open(FILENAME, 'w')
-
-    file2.write(str(resp))
-    file2.write(resp.text)
-    file2.close()
-
-def sendToSlack():
-    now = datetime.datetime.now()
-    text = "Bot findings for " + str(now.month) + '/' + str(now.day) + '/' + str(now.year) + '\n'
-    file = open(FILENAME, 'r')
-    for line in file:
-        text = text + line.rstrip() + '\n'
-    file.close()
-
-    post = '{"text": "' + text + '"}'
-
-    resp = requests.post(SLACKHOOK, data=post)
-
-def visible(element):
-    if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
-        return False
-    elif re.match('<!--.*-->', str(element)):
-        return False
-    return True
 
 # Run the program
 main()
@@ -293,22 +226,6 @@ if(DEBUG):
     c = 0
     d = []
     for i in CHECKEDLINKS:
-        c += 1
-        if(c != 1):
-            try:
-                if ('http' in i):
-                    s = i.split('/')[4] + i.split('/')[5]
-                elif('www' in i):
-                    s = i.split('/')[3] + i.split('/')[4]
-                else:
-                    s = i.split('/')[1] + i.split('/')[2]
-            except: 
-                s = str(i)
-        else:
-            s = 'base'
-        if (s not in d):
-            d.append(s)
-        
-    for j in d:
-        file.write(j + "\n")
+        file.write(i + "\n")
+    file.close()
     print('CheckedLinks length: '+str(c))
