@@ -18,7 +18,7 @@ CHECK = "sandbox"
 REPEAT = "~cems"
 
 # This helps optimise by ignoring links with these phrases
-EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany']
+EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany','.jpg','menu.html', 'Page=Courses']
 
 # This prevents repitition in the recursion 
 CHECKEDLINKS = [BASEURL]
