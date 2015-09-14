@@ -1,6 +1,7 @@
 #test file
 test.py
 Logs/*.txt
+__pycache__/*
 
 # Windows image file caches
 Thumbs.db
