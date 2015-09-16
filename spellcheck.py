@@ -1,4 +1,3 @@
-import enchant
 '''
 This function checks the spelling for every word on the given page
 @params
