@@ -79,4 +79,31 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
 
 
 checktext()
+
+#checktext()
+#def getWordHash():
+#start = datetime.datetime.now()
+words = open("spell.words").readlines()
+words = map(lambda x: x.strip(), words)
+hash = {}
+for word in words : hash[word] = True
+#end = datetime.datetime.now()
+#print(end-start)
+#return hash
+
+def spellCheckHash(words, hash):
+    #secondstart = datetime.datetime.now()
+    for i in words : 
+        a = i in hash
+    #Secondend = datetime.datetime.now()
+    #print(Secondend-secondstart)
+
+words = open("spell.words").readlines()
+words = map(lambda x: x.strip(), words)
+start = datetime.datetime.now()
+for i in range(10000):
+    spellCheckHash(words, hash)
+end = datetime.datetime.now()
+print(end-start)
+
 '''
