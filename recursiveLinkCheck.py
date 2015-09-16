@@ -1,9 +1,9 @@
 ﻿from bs4 import BeautifulSoup
-import urllib.request
 import requests
 import datetime
 import re
 from urllib.parse import urljoin
+import sys
 
 # This is the start point for the recursion
 BASEURL = "http://www.uvm.edu/~cems/"
@@ -30,9 +30,11 @@ FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' + str(DATE.day) + '_' + str(
 
 # This will enable spell checking for all pages
 # Currently Not working.
-SPELLCHECK = False
+SPELLCHECK = True
 if (SPELLCHECK):
-    from spellcheck import spellCheck
+    from spellcheck import SpellCheck
+    spell = SpellCheck()
+    spellcheck = spell.checktext
 
 # This is for the Basecamp API
 # Set to false if you are testing
@@ -52,13 +54,15 @@ if (CHECK404):
 DEBUG = True
 
 #Post result to a slack webhook
-SLACK = True
+SLACK = False
 SLACKHOOK = "https://hooks.slack.com/services/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"
 if (SLACK):
     from handleAPI import sendToSlack
 
 if (DEBUG):
     print(str(DATE.hour) + ':' + str(DATE.minute) + ':' + str(DATE.second))
+
+SPELLINGERRORS = []
 
 '''
 This function runs the file operations and starts the other functions
@@ -90,11 +94,10 @@ def main():
             #print(i)
         if (not isBadLink):
             file.write("All Clear!\n")
-        file.write("\n404 Errors:\n\n")
-        for j in f404:
-            file.write(j+'\n\n')
-        if (not f404):
-            file.write("All Clear!\n\n")
+        if (f404):
+            file.write("\n404 Errors:\n\n")
+            for j in f404:
+                file.write(j+'\n\n')
         if (SPELLCHECK):
             file.write("Spelling Errors:\n\n")
         for k in spell:
@@ -112,6 +115,14 @@ def main():
         sendToBaseCamp(USERNAME, PASSWORD, FILENAME)
     if (SLACK):
         sendToSlack(SLACKHOOK, FILENAME)
+
+def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
+    enc = file.encoding
+    if enc == 'UTF-8':
+        print(*objects, sep=sep, end=end, file=file)
+    else:
+        f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
+        print(*map(f, objects), sep=sep, end=end, file=file)
     
 '''
 @params:
@@ -138,26 +149,27 @@ def getBadLinks(url, lastUrl):
     try:
         bLinks = []
         
-        pageFile = urllib.request.urlopen(url)
-        pageHTML = pageFile.read()
-        pageFile.close()
+        page = requests.get(url)
+        pageHTML = page.text
 
         global COUNT
         global CHECKEDLINKS
 
         COUNT += 1
         
-        soup = BeautifulSoup(pageHTML)
+        soup = BeautifulSoup(pageHTML, "html.parser")
+        linkSoup = soup.find_all('a')
 
         if (SPELLCHECK):
-            textSoup = soup.get_text()
-            bLinks.append(spellCheck(textSoup, url))
+            checked = spellcheck(soup, url)
+            if (checked):
+                bLinks.append(checked)
+                SPELLINGERRORS.append(checked)
 
-        linkSoup = soup.find_all("a")
         
         for link in linkSoup:
             if link.has_attr('href'):
-                link['href'] = urlReconstruct(link['href'])
+                link['href'] = urlReconstruct(url, link['href'])
                 if (CHECK in link['href']):
                     if (SLACK):
                         bLinks.append('Bad Link in <'+url+'|link> linking to: <'+link['href'] + '|link>')
@@ -203,7 +215,7 @@ def getBadLinks(url, lastUrl):
             pass
         return bLinks
 
-def urlReconstruct(url):
+def urlReconstruct(base, url):
     if ('http' in url):
         return str(url)
     elif ('//www' in url):
@@ -211,7 +223,7 @@ def urlReconstruct(url):
     elif ('uvm.edu' in url):
         return str('http://www.' + url)
     else:
-        return str(urljoin(str(BASEURL), str(url)))
+        return str(urljoin(str(base), str(url)))
 
 
 # Run the program
@@ -219,6 +231,7 @@ main()
 print("Done")
 if (DEBUG):
     finished = datetime.datetime.now()
+    print("Checked Links: " + len(CHECKEDLINKS))
     print(str(finished.hour) + ':' + str(finished.minute) + ':' + str(finished.second))
     print("Time elapsed: " + str(finished - DATE))
 
@@ -228,5 +241,8 @@ if(DEBUG):
     d = []
     for i in CHECKEDLINKS:
         file.write(i + "\n")
+    file.write("\nSpellingErrors:\n")
+    for i in spell.errors:
+        file.write(i + ", ")   
     file.close()
     print('CheckedLinks length: '+str(c))
