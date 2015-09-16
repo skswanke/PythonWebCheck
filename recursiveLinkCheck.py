@@ -231,7 +231,7 @@ main()
 print("Done")
 if (DEBUG):
     finished = datetime.datetime.now()
-    print("Checked Links: " + len(CHECKEDLINKS))
+    print("Checked Links: " + str(len(CHECKEDLINKS)))
     print(str(finished.hour) + ':' + str(finished.minute) + ':' + str(finished.second))
     print("Time elapsed: " + str(finished - DATE))
 
