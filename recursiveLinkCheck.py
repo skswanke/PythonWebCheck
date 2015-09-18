@@ -4,6 +4,8 @@ import datetime
 import re
 from urllib.parse import urljoin
 import sys
+from queue import Queue
+from threading import Thread
 
 # This is the start point for the recursion
 BASEURL = "http://www.uvm.edu/~cems/"
@@ -21,7 +23,7 @@ REPEAT = "~cems"
 EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses']
 
 # This prevents repitition in the recursion 
-CHECKEDLINKS = [BASEURL]
+CHECKEDLINKS = set(BASEURL)
 
 # These are for file operations
 COUNT = 0
@@ -70,7 +72,7 @@ This function runs the file operations and starts the other functions
 def main():
     print('Started')
     badLinks = []
-    badLinks.extend(getBadLinks(BASEURL,BASEURL))
+    badLinks = getBadLinks(BASEURL,BASEURL)
     file = open(FILENAME,'w')
     if (DEBUG):
         print('badLinks Length:'+str(len(badLinks)))
@@ -124,6 +126,17 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
         f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
         print(*map(f, objects), sep=sep, end=end, file=file)
     
+
+class threadWorker(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue
+
+    def run(self):
+        link = self.queue.get()
+        self.queue.task_done()
+
+
 '''
 @params:
     Base url
@@ -148,7 +161,7 @@ It uses
 def getBadLinks(url, lastUrl):
     try:
         bLinks = []
-        
+        """        
         page = requests.get(url)
         pageHTML = page.text
 
@@ -159,14 +172,67 @@ def getBadLinks(url, lastUrl):
         
         soup = BeautifulSoup(pageHTML, "html.parser")
         linkSoup = soup.find_all('a')
-
+        
         if (SPELLCHECK):
             checked = spellcheck(soup, url)
             if (checked):
                 bLinks.append(checked)
                 SPELLINGERRORS.append(checked)
-
+        """
+        urlstovisit = Queue()
+        urlstovisit.put(url, lastUrl)
         
+        while (urlstovisit.qsize() > 0):
+            print (urlstovisit.qsize)
+            nexturl = urlstovisit.get()
+            print(nexturl)
+            page = requests.get(nexturl)
+            pageHTML = page.text
+
+            global COUNT
+            global CHECKEDLINKS
+
+            COUNT += 1
+            
+            soup = BeautifulSoup(pageHTML, "html.parser")
+            linkSoup = soup.find_all('a')
+            print(len(linkSoup))
+            #process request
+            CHECKEDLINKS.add(nexturl)
+            if (SPELLCHECK):
+                checked = spellcheck(soup, url)
+            if (checked):
+                bLinks.append(checked)
+                SPELLINGERRORS.append(checked)
+            for link in linkSoup:
+                print (urlstovisit.qsize())
+                #add links to queue
+                if link.has_attr('href'):
+                    link['href'] = urlReconstruct(url, link['href'])
+                    if (CHECK in link['href']):
+                        if (SLACK):
+                            bLinks.append('Bad Link in <'+url+'|link> linking to: <'+link['href'] + '|link>')
+                        else:
+                            bLinks.append('Bad Link in '+url+'\nlinking to: '+link['href'])
+                        if (DEBUG):
+                            print('foundbadlink: '+url)
+                    elif (REPEAT in link['href'] and not any(x in link['href'] for x in EXCEPT)):
+                        if (link['href'] not in CHECKEDLINKS):
+                            CHECKEDLINKS.add(link['href'])
+                            urlstovisit.put(link['href'],url)
+                        elif (link['href'] not in CHECKEDLINKS):
+                            CHECKEDLINKS.add(link['href'])
+                            urlstovisit.put(link)
+                    elif (CHECK404 and link['href'] not in CHECKEDLINKS and 404 == getResponseCode(link['href'])):
+                        CHECKEDLINKS.add(link['href'])
+                        if (SLACK):
+                            bLinks.append(["404 in page: <" + url + "|link> Linking to: <" + link['href'] + "|link>"])
+                        else:
+                            bLinks.append(["404 in page: " + url + "\nLinking to: " + link['href']])
+            urlstovisit.task_done()
+            return blinks
+
+        """
         for link in linkSoup:
             if link.has_attr('href'):
                 link['href'] = urlReconstruct(url, link['href'])
@@ -197,8 +263,9 @@ def getBadLinks(url, lastUrl):
         COUNT -= 1
 
         return bLinks
-    
+        """
     except Exception as e:
+        raise e
         if ("404" in str(e)):
             if (DEBUG):
                 print("404 in page: " + lastUrl + "\nLinking to: " + url)
