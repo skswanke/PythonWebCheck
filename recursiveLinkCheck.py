@@ -1,6 +1,6 @@
 ﻿from bs4 import BeautifulSoup
 import requests
-import datetime
+from datetime import datetime
 import re
 from urllib.parse import urljoin
 import sys
@@ -10,25 +10,25 @@ from threading import Thread
 # This is the start point for the recursion
 BASEURL = "http://www.uvm.edu/~cems/"
 
-# This is to help when following local links
-URLSTART = "http://www.uvm.edu/"
-
 # This is what would make the link bad (to the wrong place)
 CHECK = "sandbox"
 
-# This limits the recursion to links containing this phrase
-REPEAT = "~cems"
+# This limits the iteration to links containing this phrase
+REPEAT = "uvm.edu/~cems/"
 
 # This helps optimise by ignoring links with these phrases
-EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local','#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses']
+EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local', \
+    '#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses', \
+    'mailto:', 'tel:']
 
 # This prevents repitition in the recursion 
-CHECKEDLINKS = set(BASEURL)
+CHECKEDLINKS = set()
 
 # These are for file operations
 COUNT = 0
-DATE = datetime.datetime.now()
-FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' + str(DATE.day) + '_' + str(DATE.year) + '.txt'
+DATE = datetime.now()
+FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
+    + str(DATE.day) + '_' + str(DATE.year) + '.txt'
 
 # This will enable spell checking for all pages
 # Currently Not working.
@@ -66,17 +66,36 @@ if (DEBUG):
 
 SPELLINGERRORS = []
 
+BADLINKS = []
+
+urlsToVisit = Queue()
+
+THREADS = 6
+
 '''
 This function runs the file operations and starts the other functions
 '''
 def main():
+    global BADLINKS
+    global SPELLINGERRORS
+    global CHECKEDLINKS
+    global urlsToVisit
     print('Started')
-    badLinks = []
-    badLinks = getBadLinks(BASEURL,BASEURL)
+    ts = datetime.now()
+    queue = Queue()
+    for x in range(THREADS):
+        worker = DownloadWorker(queue, x)
+        worker.daemon = True
+        worker.start()
+
+    urlsToVisit.put(BASEURL)
+
+    urlsToVisit.join()
+
     file = open(FILENAME,'w')
     if (DEBUG):
-        print('badLinks Length:'+str(len(badLinks)))
-    if (len(badLinks) == 0):
+        print('badLinks Length:'+str(len(BADLINKS)))
+    if (len(BADLINKS) == 0):
         if (DEBUG):
             print("All Clear!")
         file.write("All Clear!")
@@ -85,13 +104,13 @@ def main():
         spell = []
         file.write("Bad Links:\n\n")
         isBadLink = False
-        for i in badLinks:
+        for i in BADLINKS:
             if ("404" in i):
                 f404.append(i)
             elif ("Spelling" in i or i == []):
                 spell.append(i)
             else:
-                file.write(str(i)+'\n\n')
+                file.write(str(i)+'\n')
                 isBadLink = True
             #print(i)
         if (not isBadLink):
@@ -99,9 +118,9 @@ def main():
         if (f404):
             file.write("\n404 Errors:\n\n")
             for j in f404:
-                file.write(j+'\n\n')
+                file.write(j+'\n')
         if (SPELLCHECK):
-            file.write("Spelling Errors:\n\n")
+            file.write("\nSpelling Errors:\n\n")
         for k in spell:
             if(k != []):
                 file.write(k+'\n')
@@ -118,6 +137,9 @@ def main():
     if (SLACK):
         sendToSlack(SLACKHOOK, FILENAME)
 
+    print("Finished {}".format(datetime.now() - ts))
+    print(len(CHECKEDLINKS))
+
 def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
     enc = file.encoding
     if enc == 'UTF-8':
@@ -127,14 +149,71 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
         print(*map(f, objects), sep=sep, end=end, file=file)
     
 
-class threadWorker(Thread):
-    def __init__(self, queue):
+class DownloadWorker(Thread):
+    def __init__(self, queue, i):
         Thread.__init__(self)
-        self.queue
-
+        self.queue = queue
+        self.i = i
+    
     def run(self):
-        link = self.queue.get()
-        self.queue.task_done()
+        global urlsToVisit
+        global CHECKEDLINKS
+        global BADLINKS
+        while True:
+            try:
+                newlink = urlsToVisit.get()
+                #process
+                if newlink not in CHECKEDLINKS:
+                    print("{:2}".format(self.i) + ": " + newlink)
+                    page = requests.get(newlink)
+                    CHECKEDLINKS.add(newlink)
+                    soup = BeautifulSoup(page.text, "html.parser")
+                    links = soup.find_all('a')
+                    if (SPELLCHECK):
+                        checked = spellcheck(soup, newlink)
+                    if (checked):
+                        BADLINKS.append(checked)
+                        SPELLINGERRORS.append(checked)
+                    for link in links:
+                        if link.has_attr('href'):
+                            link['href'] = urlReconstruct(newlink, link['href'])
+                            if (CHECK in link['href']):
+                                if (SLACK):
+                                    BADLINKS.append('Bad Link in <'+url+'|link> linking to: <'+link['href'] + '|link>')
+                                else:
+                                    BADLINKS.append('Bad Link in '+url+'\nlinking to: '+link['href'])
+                                if (DEBUG):
+                                    print('foundbadlink: '+url)
+                            elif (REPEAT in link['href'] \
+                                and link["href"] not in CHECKEDLINKS \
+                                and not any(x in link['href'] for x in EXCEPT)):
+                                urlsToVisit.put(link["href"])
+                            elif (CHECK404 \
+                                and link['href'] not in CHECKEDLINKS \
+                                and 404 == getResponseCode(link['href'])):
+                                CHECKEDLINKS.add(link['href'])
+                                if (SLACK):
+                                    BADLINKS.append(["404 in page: <" + url + "|link> Linking to: <" + link['href'] + "|link>"])
+                                else:
+                                    BADLINKS.append(["404 in page: " + url + "\nLinking to: " + link['href']])
+            except Exception as e:
+                raise e
+                if ("404" in str(e)):
+                    if (DEBUG):
+                        print("404 in page: " + lastUrl + "\nLinking to: " + url)
+                    if (SLACK):
+                        BADLINKS.append(["404 in page: <" + lastUrl + "|link> Linking to: <" + url + "|link>"])
+                    return ["404 in page: " + lastUrl + "\nLinking to: " + url]
+                elif ("href" in str(e)):
+                    if (DEBUG):
+                        print("Error: href")
+                    pass
+                else:
+                    if (DEBUG):
+                        print('Error: ' + str(e))
+                    pass
+
+            urlsToVisit.task_done()
 
 
 '''
@@ -152,11 +231,11 @@ page on the site.
 
 It uses 
     -BASEURL as a start point
-    -URLSTART for links that are local
     -CHECK to check the links against for an error
     -REPEAT to limit where it recurses
     -EXCEPT to optimize against repetitive/unwanted links
     -CHECKEDLINKS to prevent repetition
+'''
 '''
 def getBadLinks(url, lastUrl):
     try:
@@ -183,7 +262,7 @@ def getBadLinks(url, lastUrl):
         urlstovisit.put(url, lastUrl)
         
         while (urlstovisit.qsize() > 0):
-            print (urlstovisit.qsize)
+            print (urlstovisit.qsize())
             nexturl = urlstovisit.get()
             print(nexturl)
             page = requests.get(nexturl)
@@ -281,23 +360,16 @@ def getBadLinks(url, lastUrl):
                 print('Error: ' + str(e))
             pass
         return bLinks
-
+'''
 def urlReconstruct(base, url):
-    if ('http' in url):
-        return str(url)
-    elif ('//www' in url):
-        return 'http:' + url
-    elif ('uvm.edu' in url):
-        return str('http://www.' + url)
-    else:
-        return str(urljoin(str(base), str(url)))
+    return str(urljoin(str(base.replace("https", "http")), str(url.replace("https", "http"))))
 
 
 # Run the program
 main()
 print("Done")
 if (DEBUG):
-    finished = datetime.datetime.now()
+    finished = datetime.now()
     print("Checked Links: " + str(len(CHECKEDLINKS)))
     print(str(finished.hour) + ':' + str(finished.minute) + ':' + str(finished.second))
     print("Time elapsed: " + str(finished - DATE))

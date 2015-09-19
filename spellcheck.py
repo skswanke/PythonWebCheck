@@ -18,7 +18,7 @@ class SpellCheck():
     def __init__(self):
         #SpellCheck.__init__(self)
         #print("SpellCheck Init")
-        self.errors = []
+        self.errors = set()
         self.hash = {}
         spellwords = open("words_en.txt").readlines()
         spellwords = map(lambda x: x.strip(), spellwords)
@@ -39,6 +39,7 @@ class SpellCheck():
         # drop blank lines
         text = '\n'.join(chunk for chunk in chunks if chunk)
         text = re.sub(r'\w*\d\w*', '', str(text)).strip()
+        text = re.sub(r'\w*([a-zA-Z])[\d.]([a-zA-Z]).*\w*', '', str(text)).strip()
         findwords = re.compile(r"\b[A-Za-z][A-Za-z][A-Za-z]+\b")
         words = findwords.findall(text)
         #print(words)
@@ -50,10 +51,12 @@ class SpellCheck():
 
     def spellCheckHash(self, words):
         misspelled = [word for word in words if not word.lower() in self.hash]
-        self.errors = list(set(self.errors + misspelled))
+        seterrors = set()
+        for error in misspelled:
+            seterrors.add(error)
         # for i in words :
         #     if (not i.lower() in self.hash):
         #         misspelled.extend(i)
         #         print(i)
         #print(misspelled)
-        return misspelled
+        return seterrors
