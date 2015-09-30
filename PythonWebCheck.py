@@ -8,18 +8,18 @@ from queue import Queue
 from threading import Thread
 
 # This is the start point for the recursion
-BASEURL = "http://www.uvm.edu/~cems/?Page=explore/default.php&SM=explore/_exploremenu.html"
+BASEURL = "http://www.uvm.edu/~cems/"
 
 # This is what would make the link bad (to the wrong place)
 CHECK = "sandbox"
 
 # This limits the iteration to links containing this phrase
-REPEAT = "http://www.uvm.edu/~cems/?Page=explore/default.php&SM=explore/_exploremenu.html"
+REPEAT = "http://www.uvm.edu/~cems/"
 
 # This helps optimise by ignoring links with these phrases
 EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local', \
     '#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses', \
-    'mailto:', 'tel:', '#', '.zip']
+    'mailto:', 'tel:', '#', '.zip', '.mp4', '.mov']
 
 # This prevents repitition in the recursion 
 CHECKEDLINKS = set()
@@ -71,7 +71,7 @@ BADLINKS = []
 urlsToVisit = Queue()
 
 #The number of threads to operate in
-THREADS = 1
+THREADS = 2
 
 def main():
     global BADLINKS
@@ -187,7 +187,6 @@ class DownloadWorker(Thread):
                                 else:
                                     BADLINKS.append(["404 in page: " + url + "\nLinking to: " + link['href']])
             except Exception as e:
-                raise e
                 if ("404" in str(e)):
                     if (DEBUG):
                         print("404 in page: " + lastUrl + "\nLinking to: " + url)
