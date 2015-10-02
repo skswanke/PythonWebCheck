@@ -3,18 +3,6 @@ import requests
 import datetime
 
 '''
-This method check the http response of a given link
-@params
-    -url to check status of
-'''
-def getResponseCode(url):
-    try:
-        conn = urllib.request.urlopen(url)
-        return conn.getcode()
-    except urllib.error.HTTPError:
-        return 404
-
-'''
 This function sends the relevant information to Basecamp using their api
 '''
 def sendToBaseCamp(USERNAME, PASSWORD, FILENAME):
