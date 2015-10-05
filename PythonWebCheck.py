@@ -230,7 +230,7 @@ class DownloadWorker(Thread):
     def getResponseCode(self, url):
         try:
             r = requests.get(url)
-            return r.status_code == requests.codes.ok
+            return r.status_code == "404"
         except e:
             print(e)
             return False
