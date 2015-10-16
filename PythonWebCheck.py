@@ -32,7 +32,7 @@ FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
 
 # This will enable spell checking for all pages
 # Currently Not working.
-SPELLCHECK = False
+SPELLCHECK = True
 if (SPELLCHECK):
     from spellcheck import SpellCheck
     spell = SpellCheck()
@@ -48,13 +48,13 @@ if (BASECAMP):
     PASSWORD = ""
 
 # This will check ALL links for 404 It will take Significantly more time
-CHECK404 = True
+CHECK404 = False
 
 # Enables Debug features
 DEBUG = True
 
 #Post result to a slack webhook
-SLACK = True
+SLACK = False
 SLACKHOOK = "https://hooks.slack.com/services/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"
 if (SLACK):
     from handleAPI import sendToSlack
@@ -76,18 +76,22 @@ THREADS = 4
 
 def main():
     # Import global variables for editing
+    # Badlinks will store all of the problem links
     global BADLINKS
+    # Spelling errors will store all misspelled words
     global SPELLINGERRORS
+    # Checkedlinks is a set of all crawled links (to prevent recrawling)
     global CHECKEDLINKS
+    # urls to visit is a queue of all links found in searched pages that
+    #   contain the Repeat variable
     global urlsToVisit
     print('Started')
+    # get an initial time (to get runtime)
     ts = datetime.now()
-    # Initialize queue
-    queue = Queue()
     # Initialize threads
     for x in range(THREADS):
         # Set the worker to do the Download worker method
-        worker = DownloadWorker(queue, x)
+        worker = DownloadWorker(x)
         # Set the threads to execute until all work is done
         worker.daemon = True
         # Start the workers
@@ -96,10 +100,11 @@ def main():
     # Add the base url to the queue
     urlsToVisit.put([BASEURL, BASEURL])
 
-    # Join the queue (ensure that all the work is done)
+    # Join the queue 
+    # (ensure that all the work is done, and all links have been crawled)
     urlsToVisit.join()
 
-    # Open our bad links file
+    # Open our bad links file for logging
     file = open(FILENAME,'w')
     if (DEBUG):
         print('badLinks Length:'+str(len(BADLINKS)))
@@ -113,22 +118,31 @@ def main():
     else:
         f404 = []
         spell = []
+        # Add the bad links to the file
         file.write("Bad Links:\n\n")
         isBadLink = False
         for i in BADLINKS:
+            # Seperate out 404 errors
             if ("404" in i):
                 f404.append(i)
+            # Seperate out spelling errors
             elif ("Spelling" in i or i == []):
                 spell.append(i)
+            # Write the linking errors to the file
             else:
                 file.write(str(i)+'\n')
                 isBadLink = True
+        
         if (not isBadLink):
             file.write("All Clear!\n")
+        
+        # If there are 404 errors, add them to the file
         if (f404):
             file.write("\n404 Errors:\n\n")
             for j in f404:
                 file.write(j+'\n')
+        
+        # If there are spellcheck errors add that to the page
         if (SPELLCHECK):
             file.write("\nSpelling Errors:\n\n")
         for k in spell:
@@ -154,37 +168,53 @@ def main():
 
 # Where the magic happens
 class DownloadWorker(Thread):
-    # Initialize thread and queue
-    def __init__(self, queue, i):
+    # Initialize thread and thread id
+    def __init__(self, i):
         Thread.__init__(self)
-        self.queue = queue
         self.i = i
     
-    # Run
+    # This is where the work happens
     def run(self):
+        #import global variables
         global urlsToVisit
         global CHECKEDLINKS
         global BADLINKS
+        # Running an infinite loop for the worker
+        # This will end when the queue is empty because of the deamon
         while True:
+            # General Error Catch here
+            # TODO make specific error handling
             try:
+                # seperate out the new link from the old link
+                # this is necessary for describing where the link is
                 newlinkpair = urlsToVisit.get()
                 newlink = newlinkpair[0]
                 reflink = newlinkpair[1]
-                #process
+                # Check to make sure that we haven't processed this link before
                 if newlink not in CHECKEDLINKS:
+                    # show the thread id and the page
                     print("{:2}".format(self.i) + ": " + newlink)
+                    # get page from server
                     page = requests.get(newlink)
                     CHECKEDLINKS.add(newlink)
+                    # parse the html and extract the links into a list
                     soup = BeautifulSoup(page.text, "html.parser")
                     links = soup.find_all('a')
+                    # Send the page to spellcheck and get results
                     if (SPELLCHECK):
                         checked = spellcheck(soup, newlink, SLACK)
+                        # if there were spelling errors add them to bad links
                         if (checked):
                             BADLINKS.append(checked)
                             SPELLINGERRORS.append(checked)
+
+                    # Here we look through all of the links we extracted
                     for link in links:
+                        # make sure that the links have an href
                         if link.has_attr('href'):
+                            # reconstruct the url (for relative urls)
                             link['href'] = self.urlReconstruct(newlink, link['href'])
+                            # if the link points to the sandbox add it to the badlinks with the current page
                             if (CHECK in link['href']):
                                 if (SLACK):
                                     BADLINKS.append('Bad Link in <'+newlink+'|link> linking to: <'+link['href'] + '|link>')
@@ -192,10 +222,12 @@ class DownloadWorker(Thread):
                                     BADLINKS.append('Bad Link in '+newlink+'\nlinking to: '+link['href'])
                                 if (DEBUG):
                                     print('foundbadlink: '+newlink)
+                            # If the link is a part of the site we are searching add it to the queue
                             elif (REPEAT in link['href'] \
                                 and link["href"] not in CHECKEDLINKS \
                                 and not any(x in link['href'] for x in EXCEPT)):
                                 urlsToVisit.put([link["href"], newlink])
+                            # If we are checking for 404 links then get the response code from every link on the page
                             elif (CHECK404 \
                                 and link['href'] not in CHECKEDLINKS \
                                 and not any(x in link['href'] for x in EXCEPT) \
@@ -205,13 +237,17 @@ class DownloadWorker(Thread):
                                     BADLINKS.append(["404 in page: <" + newlink + "|link> Linking to: <" + link['href'] + "|link>"])
                                 else:
                                     BADLINKS.append(["404 in page: " + newlink + "\nLinking to: " + link['href']])
+            # General exception catch
+            # This needs to get more specific
             except Exception as e:
+                # if the exception is due to 404 append it to blinks
                 if ("404" in str(e)):
                     if (DEBUG):
                         print("404 in page: " + reflink + "\nLinking to: " + newlink)
                     if (SLACK):
                         BADLINKS.append(["404 in page: <" + reflink + "|link> Linking to: <" + newlink + "|link>"])
                     return ["404 in page: " + reflink + "\nLinking to: " + newlink]
+                # if it is another exception print what it is
                 elif ("href" in str(e)):
                     if (DEBUG):
                         print("Error: href")
@@ -220,10 +256,10 @@ class DownloadWorker(Thread):
                     if (DEBUG):
                         print('Error: ' + str(e))
                     pass
-
+            # report the url as checked in urls to visit
             urlsToVisit.task_done()
 
-    # This will reconstruct a relative url
+    # This will reconstruct a relative url or return an absolute url unchanged
     def urlReconstruct(self, base, url):
         return str(urljoin(str(base.replace("https", "http")), str(url.replace("https", "http"))))
 
@@ -234,15 +270,6 @@ class DownloadWorker(Thread):
         except e:
             print(e)
             return False
-
-# This function will print anything (no matter the encoding)
-def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
-    enc = file.encoding
-    if enc == 'UTF-8':
-        print(*objects, sep=sep, end=end, file=file)
-    else:
-        f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
-        print(*map(f, objects), sep=sep, end=end, file=file)
 
 # Run the program
 main()
