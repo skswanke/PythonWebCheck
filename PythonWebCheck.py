@@ -196,6 +196,9 @@ class DownloadWorker(Thread):
                     print("{:2}".format(self.i) + ": " + newlink)
                     # get page from server
                     page = requests.get(newlink)
+                    headers = page.headers
+                    if ("text" not in headers["content-type"]):
+                    	raise Exception("Not Text")
                     CHECKEDLINKS.add(newlink)
                     # parse the html and extract the links into a list
                     soup = BeautifulSoup(page.text, "html.parser")
