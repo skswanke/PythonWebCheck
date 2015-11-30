@@ -21,31 +21,9 @@ EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local', \
     '#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses', \
     'mailto:', 'tel:', '#', '.zip', '.mp4', '.mov']
 
-# This prevents repitition in the recursion 
-CHECKEDLINKS = set()
-
-# These are for file operations
-COUNT = 0
-DATE = datetime.now()
-FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
-    + str(DATE.day) + '_' + str(DATE.year) + '.txt'
-
 # This will enable spell checking for all pages
 # Currently Not working.
 SPELLCHECK = True
-if (SPELLCHECK):
-    from spellcheck import SpellCheck
-    spell = SpellCheck()
-    spellcheck = spell.checktext
-
-# This is for the Basecamp API
-# Set to false if you are testing
-BASECAMP = False
-if (BASECAMP):
-    from handleAPI import sendToBaseCamp
-    # Your Basecamp Username and Password
-    USERNAME = ""
-    PASSWORD = ""
 
 # This will check ALL links for 404 It will take Significantly more time
 CHECK404 = False
@@ -55,6 +33,32 @@ DEBUG = True
 
 #Post result to a slack webhook
 SLACK = False
+
+# This is for the Basecamp API
+# Set to false if you are testing
+BASECAMP = False
+
+# This prevents repitition in the recursion 
+CHECKEDLINKS = set()
+
+# These are for file operations
+COUNT = 0
+DATE = datetime.now()
+FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
+    + str(DATE.day) + '_' + str(DATE.year) + '.txt'
+
+if (SPELLCHECK):
+    from spellcheck import SpellCheck
+    spell = SpellCheck()
+    spellcheck = spell.checktext
+
+if (BASECAMP):
+    from handleAPI import sendToBaseCamp
+    # Your Basecamp Username and Password
+    USERNAME = ""
+    PASSWORD = ""
+
+
 SLACKHOOK = "https://hooks.slack.com/services/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"
 if (SLACK):
     from handleAPI import sendToSlack
