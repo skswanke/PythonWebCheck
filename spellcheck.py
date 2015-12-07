@@ -31,6 +31,8 @@ class SpellCheck():
         text = re.sub(r'\w*\d\w*', '', str(text)).strip()
         # This regex removes all caps words (to get rid of acronyms) i.e. NASA
         text = re.sub(r'\b[A-Z]+\b', '', str(text)).strip()
+        # This regex removes words that begin with capitol letters (In an effort to reduce false positives)
+        text = re.sub(r'\b[A-Z][a-z]+\b', '', str(text)).strip()
         # This regex removes words with special characters. i.e. for%narnia
         text = re.sub(r'\w+[a-zA-Z0-9.+-][\d\.\/\@\*-][a-zA-Z.@/?=0-9]*\w+', '', str(text)).strip()
         # This regex also removes words with special characters

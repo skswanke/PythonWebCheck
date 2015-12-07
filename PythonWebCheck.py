@@ -22,7 +22,6 @@ EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local', \
     'mailto:', 'tel:', '#', '.zip', '.mp4', '.mov']
 
 # This will enable spell checking for all pages
-# Currently Not working.
 SPELLCHECK = True
 
 # This will check ALL links for 404 It will take Significantly more time
