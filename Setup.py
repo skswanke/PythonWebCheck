@@ -24,13 +24,15 @@ DEBUG = True
 
 #Post result to a slack webhook
 SLACK = False
+#Link to Slack with slack hook
+SLACKHOOK = "https://hooks.slack.com/services/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"
 
 # This is for the Basecamp API
-# Set to false if you are testing
 BASECAMP = False
 # Your Basecamp Username and Password
 USERNAME = ""
 PASSWORD = ""
 
-#Link to Slack with slack hook
-SLACKHOOK = "https://hooks.slack.com/services/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"
+
+#The number of threads to operate in (rule of thumb: 1 thread for each core)
+THREADS = 4
