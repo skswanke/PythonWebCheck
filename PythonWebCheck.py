@@ -1,8 +1,5 @@
-﻿from bs4 import BeautifulSoup
-import requests
 from datetime import datetime
 import re
-from urllib.parse import urljoin
 import sys
 from queue import Queue
 from threading import Thread
@@ -20,10 +17,6 @@ COUNT = 0
 DATE = datetime.now()
 FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
     + str(DATE.day) + '_' + str(DATE.year) + '.txt'
-
-if (config.SPELLCHECK):
-    spell = SpellCheck()
-    spellcheck = spell.checktext
 
 if (config.DEBUG):
     print(str(DATE.hour) + ':' + str(DATE.minute) + ':' + str(DATE.second))
