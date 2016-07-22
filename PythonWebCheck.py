@@ -6,39 +6,13 @@ from urllib.parse import urljoin
 import sys
 from queue import Queue
 from threading import Thread
-
-# This is the start point for the recursion
-BASEURL = "http://www.uvm.edu/~cems/"
-
-# This is what would make the link bad (to the wrong place)
-CHECK = "sandbox"
-
-# This limits the iteration to links containing this phrase
-REPEAT = "http://www.uvm.edu/~cems/"
-
-# This helps optimise by ignoring links with these phrases
-EXCEPT = ['magic','.pdf','calendar','#bannermenu','#local', \
-    '#uvmmaincontent','cems&howmany','.jpg', 'Page=Courses', \
-    'mailto:', 'tel:', '#', '.zip', '.mp4', '.mov']
-
-# This will enable spell checking for all pages
-SPELLCHECK = True
-
-# This will check ALL links for 404 It will take Significantly more time
-CHECK404 = False
-
-# Enables Debug features
-DEBUG = True
-
-#Post result to a slack webhook
-SLACK = False
-
-# This is for the Basecamp API
-# Set to false if you are testing
-BASECAMP = False
-
-# This prevents repitition in the recursion 
-CHECKEDLINKS = set()
+import Setup as config
+if (config.SPELLCHECK):
+    from spellcheck import SpellCheck
+if (config.BASECAMP):
+    from handleAPI import sendToBaseCamp
+if (SLACK):
+    from handleAPI import sendToSlack
 
 # These are for file operations
 COUNT = 0
@@ -46,24 +20,15 @@ DATE = datetime.now()
 FILENAME = 'Logs/BadLinks_' + str(DATE.month) + '_' \
     + str(DATE.day) + '_' + str(DATE.year) + '.txt'
 
-if (SPELLCHECK):
-    from spellcheck import SpellCheck
+if (config.SPELLCHECK):
     spell = SpellCheck()
     spellcheck = spell.checktext
 
-if (BASECAMP):
-    from handleAPI import sendToBaseCamp
-    # Your Basecamp Username and Password
-    USERNAME = ""
-    PASSWORD = ""
-
-
-SLACKHOOK = "https://hooks.slack.com/services/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"
-if (SLACK):
-    from handleAPI import sendToSlack
-
-if (DEBUG):
+if (config.DEBUG):
     print(str(DATE.hour) + ':' + str(DATE.minute) + ':' + str(DATE.second))
+
+# This prevents repitition in the recursion 
+CHECKEDLINKS = set()
 
 # Where spelling errors are kept
 SPELLINGERRORS = []
@@ -73,9 +38,6 @@ BADLINKS = []
 
 # Queue holds all links that will be visited
 urlsToVisit = Queue()
-
-#The number of threads to operate in
-THREADS = 4
 
 def main():
     # Import global variables for editing
@@ -92,7 +54,7 @@ def main():
     # get an initial time (to get runtime)
     ts = datetime.now()
     # Initialize threads
-    for x in range(THREADS):
+    for x in range(config.THREADS):
         # Set the worker to do the Download worker method
         worker = DownloadWorker(x)
         # Set the threads to execute until all work is done
@@ -101,7 +63,7 @@ def main():
         worker.start()
 
     # Add the base url to the queue
-    urlsToVisit.put([BASEURL, BASEURL])
+    urlsToVisit.put([config.BASEURL, config.BASEURL])
 
     # Join the queue 
     # (ensure that all the work is done, and all links have been crawled)
@@ -109,12 +71,12 @@ def main():
 
     # Open our bad links file for logging
     file = open(FILENAME,'w')
-    if (DEBUG):
+    if (config.DEBUG):
         print('badLinks Length:'+str(len(BADLINKS)))
     
     # If there are no issues print "all clear!"
     if (len(BADLINKS) == 0):
-        if (DEBUG):
+        if (config.DEBUG):
             print("All Clear!")
         file.write("All Clear!")
     # If there are issues print them into their catagories
@@ -146,7 +108,7 @@ def main():
                 file.write(j+'\n')
         
         # If there are spellcheck errors add that to the page
-        if (SPELLCHECK):
+        if (config.SPELLCHECK):
             file.write("\nSpelling Errors:\n\n")
         for k in spell:
             if(k != []):
@@ -160,11 +122,11 @@ def main():
     # Close the file
     file.close()
     # Send to BaseCamp (method located in handleAPI.py)
-    if (BASECAMP):
-        sendToBaseCamp(USERNAME, PASSWORD, FILENAME)
+    if (config.BASECAMP):
+        sendToBaseCamp(config.USERNAME, config.PASSWORD, FILENAME)
     # Send to Slack (method located in handleAPI.py)
-    if (SLACK):
-        sendToSlack(SLACKHOOK, FILENAME)
+    if (config.SLACK):
+        sendToSlack(config.SLACKHOOK, FILENAME)
     # Debug info
     print("Finished {}".format(datetime.now() - ts))
     print(len(CHECKEDLINKS))
@@ -207,8 +169,8 @@ class DownloadWorker(Thread):
                     soup = BeautifulSoup(page.text, "html.parser")
                     links = soup.find_all('a')
                     # Send the page to spellcheck and get results
-                    if (SPELLCHECK):
-                        checked = spellcheck(soup, newlink, SLACK)
+                    if (config.SPELLCHECK):
+                        checked = spellcheck(soup, newlink, config.SLACK)
                         # if there were spelling errors add them to bad links
                         if (checked):
                             BADLINKS.append(checked)
@@ -221,25 +183,25 @@ class DownloadWorker(Thread):
                             # reconstruct the url (for relative urls)
                             link['href'] = self.urlReconstruct(newlink, link['href'])
                             # if the link points to the sandbox add it to the badlinks with the current page
-                            if (CHECK in link['href']):
-                                if (SLACK):
+                            if (config.CHECK in link['href']):
+                                if (config.SLACK):
                                     BADLINKS.append('Bad Link in <'+newlink+'|link> linking to: <'+link['href'] + '|link>')
                                 else:
                                     BADLINKS.append('Bad Link in '+newlink+'\nlinking to: '+link['href'])
-                                if (DEBUG):
+                                if (config.DEBUG):
                                     print('foundbadlink: '+newlink)
                             # If the link is a part of the site we are searching add it to the queue
-                            elif (REPEAT in link['href'] \
+                            elif (config.REPEAT in link['href'] \
                                 and link["href"] not in CHECKEDLINKS \
-                                and not any(x in link['href'] for x in EXCEPT)):
+                                and not any(x in link['href'] for x in config.EXCEPT)):
                                 urlsToVisit.put([link["href"], newlink])
                             # If we are checking for 404 links then get the response code from every link on the page
-                            elif (CHECK404 \
+                            elif (config.CHECK404 \
                                 and link['href'] not in CHECKEDLINKS \
-                                and not any(x in link['href'] for x in EXCEPT) \
+                                and not any(x in link['href'] for x in config.EXCEPT) \
                                 and self.getResponseCode(link['href'])):
                                 CHECKEDLINKS.add(link['href'])
-                                if (SLACK):
+                                if (config.SLACK):
                                     BADLINKS.append(["404 in page: <" + newlink + "|link> Linking to: <" + link['href'] + "|link>"])
                                 else:
                                     BADLINKS.append(["404 in page: " + newlink + "\nLinking to: " + link['href']])
@@ -248,18 +210,18 @@ class DownloadWorker(Thread):
             except Exception as e:
                 # if the exception is due to 404 append it to blinks
                 if ("404" in str(e)):
-                    if (DEBUG):
+                    if (config.DEBUG):
                         print("404 in page: " + reflink + "\nLinking to: " + newlink)
-                    if (SLACK):
+                    if (config.SLACK):
                         BADLINKS.append(["404 in page: <" + reflink + "|link> Linking to: <" + newlink + "|link>"])
                     return ["404 in page: " + reflink + "\nLinking to: " + newlink]
                 # if it is another exception print what it is
                 elif ("href" in str(e)):
-                    if (DEBUG):
+                    if (config.DEBUG):
                         print("Error: href")
                     pass
                 else:
-                    if (DEBUG):
+                    if (config.DEBUG):
                         print('Error: ' + str(e))
                     pass
             # report the url as checked in urls to visit
@@ -281,7 +243,7 @@ class DownloadWorker(Thread):
 main()
 print("Done")
 # Debug information
-if (DEBUG):
+if (config.DEBUG):
     finished = datetime.now()
     print("Checked Links: " + str(len(CHECKEDLINKS)))
     print(str(finished.hour) + ':' + str(finished.minute) + ':' + str(finished.second))
@@ -292,7 +254,7 @@ if (DEBUG):
     for i in CHECKEDLINKS:
         file.write(i + "\n")
     file.write("\nSpellingErrors:\n")
-    if(SPELLCHECK):
+    if(config.SPELLCHECK):
         for i in spell.errors:
             file.write(i + ", ")   
         file.close()
