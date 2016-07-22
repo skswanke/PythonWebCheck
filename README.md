@@ -3,9 +3,9 @@ Multithreaded Python web crawler that checks every page in a site for various is
 
 Checks for:
 
--Links to dev enviromnent
--Links that are 404
--Spelling errors made in the page text
+- Links to dev enviromnent
+- Links that are 404
+- Spelling errors made in the page text
 
 ## How To's
 
