@@ -1,3 +1,13 @@
+import requests
+from bs4 import BeautifulSoup
+import Setup as config
+import sys
+from queue import Queue
+
+if (config.SPELLCHECK):
+    spell = SpellCheck()
+    spellcheck = spell.checktext
+
 # Each thread will run a Download Worker
 class DownloadWorker(Thread):
     # Initialize thread and thread id
